@@ -1,5 +1,6 @@
 torch==1.6
 tensorboard==2.3
+numpy
 scipy
 Pillow
 tqdm

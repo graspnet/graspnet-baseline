@@ -1,26 +1,23 @@
 import os
+import sys
 import numpy as np
 import scipy.io as scio
+from PIL import Image
 
 import torch
 from torch._six import container_abcs
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-BASEDIR = os.path.dirname(os.path.abspath(__file__))
-
-class CameraInfo():
-    def __init__(self, width, height, fx, fy, cx, cy, scale):
-        self.width = width
-        self.height = height
-        self.fx = fx
-        self.fy = fy
-        self.cx = cx
-        self.cy = cy
-        self.scale = scale
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+sys.path.append(os.path.join(ROOT_DIR, 'utils'))
+from data_utils import CameraInfo, transform_point_cloud, create_point_cloud_from_depth_image,\
+                            get_workspace_mask, remove_invisible_grasp_points
 
 class GraspNetDataset(Dataset):
-    def __init__(self, root, valid_obj_idxs, grasp_labels, camera='kinect', split='train', num_points=20000, remove_outlier=False, remove_invisible=True, augment=False, load_label=True):
+    def __init__(self, root, valid_obj_idxs, grasp_labels, camera='kinect', split='train', num_points=20000,
+                 remove_outlier=False, remove_invisible=True, augment=False, load_label=True):
         assert(num_points<=50000)
         self.root = root
         self.split = split
@@ -253,67 +250,11 @@ def load_grasp_labels(root):
         if i == 18: continue
         valid_obj_idxs.append(i + 1) #here align with label png
         label = np.load(os.path.join(root, 'grasp_label', '{}_labels.npz'.format(str(i).zfill(3))))
-        tolerance = np.load(os.path.join(BASEDIR, 'tolerance', '{}_tolerance.npy'.format(str(i).zfill(3))))
-        grasp_labels[i + 1] = (label['points'].astype(np.float32), label['offsets'].astype(np.float32), label['scores'].astype(np.float32), tolerance)
+        tolerance = np.load(os.path.join(BASE_DIR, 'tolerance', '{}_tolerance.npy'.format(str(i).zfill(3))))
+        grasp_labels[i + 1] = (label['points'].astype(np.float32), label['offsets'].astype(np.float32),
+                                label['scores'].astype(np.float32), tolerance)
 
     return valid_obj_idxs, grasp_labels
-
-def create_point_cloud_from_depth_image(depth, camera, organized=True):
-    assert(depth.shape[0] == camera.height and depth.shape[1] == camera.width)
-    xmap = np.arange(camera.width)
-    ymap = np.arange(camera.height)
-    xmap, ymap = np.meshgrid(xmap, ymap)
-    points_z = depth / camera.scale
-    points_x = (xmap - camera.cx) * points_z / camera.fx
-    points_y = (ymap - camera.cy) * points_z / camera.fy
-    cloud = np.stack([points_x, points_y, points_z], axis=-1)
-    if not organized:
-        cloud = cloud.reshape([-1, 3])
-    return cloud
-
-def transform_point_cloud(cloud, transform, format='4x4'):
-    if not (format == '3x3' or format == '4x4' or format == '3x4'):
-        raise ValueError('Unknown transformation format, only support \'3x3\' or \'4x4\' or \'3x4\'.')
-    if format == '3x3':
-        cloud_transformed = np.dot(transform, cloud.T).T
-    elif format == '4x4' or format == '3x4':
-        ones = np.ones(cloud.shape[0])[:, np.newaxis]
-        cloud_ = np.concatenate([cloud, ones], axis=1)
-        cloud_transformed = np.dot(transform, cloud_.T).T
-        cloud_transformed = cloud_transformed[:, :3]
-    return cloud_transformed
-
-def compute_point_dists(A, B):
-    A_ = A[:, np.newaxis, :]
-    B_ = B[np.newaxis, :, :]
-    dists = np.linalg.norm(A_-B_, axis=-1)
-    return dists
-
-def remove_invisible_grasp_points(cloud, grasp_points, pose, th=0.01):
-    grasp_points_trans = transform_point_cloud(grasp_points, pose)
-    dists = compute_point_dists(grasp_points_trans, cloud)
-    min_dists = dists.min(axis=1)
-    visible_mask = (min_dists < th)
-    # print(grasp_points.shape[0], visible_mask.sum())
-    return visible_mask
-
-def get_workspace_mask(cloud, seg, trans=None, organized=True, outlier=0):
-    if organized:
-        h, w, _ = cloud.shape
-        cloud = cloud.reshape([h*w, 3])
-        seg = seg.reshape(h*w)
-    if trans is not None:
-        cloud = transform_point_cloud(cloud, trans)
-    foreground = cloud[seg>0]
-    xmin, ymin, zmin = foreground.min(axis=0)
-    xmax, ymax, zmax = foreground.max(axis=0)
-    mask_x = ((cloud[:,0] > xmin-outlier) & (cloud[:,0] < xmax+outlier))
-    mask_y = ((cloud[:,1] > ymin-outlier) & (cloud[:,1] < ymax+outlier))
-    mask_z = ((cloud[:,2] > zmin-outlier) & (cloud[:,2] < zmax+outlier))
-    workspace_mask = (mask_x & mask_y & mask_z)
-    if organized:
-        workspace_mask = workspace_mask.reshape([h, w])
-    return workspace_mask
 
 def collate_fn(batch):
     if type(batch[0]).__module__ == 'numpy':
