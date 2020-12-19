@@ -1,0 +1,5 @@
+torch==1.6
+tensorboard==2.3
+scipy
+Pillow
+tqdm
