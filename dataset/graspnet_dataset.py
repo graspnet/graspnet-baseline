@@ -1,9 +1,6 @@
 import os
 import numpy as np
-from PIL import Image
 import scipy.io as scio
-import cv2
-from random import randint
 
 import torch
 from torch._six import container_abcs
@@ -117,13 +114,11 @@ class GraspNetDataset(Dataset):
         camera = CameraInfo(1280.0, 720.0, intrinsic[0][0], intrinsic[1][1], intrinsic[0][2], intrinsic[1][2], factor_depth)
 
         # generate cloud
-        # depth = add_gaussian_noise(depth, sigma=5)
         cloud = create_point_cloud_from_depth_image(depth, camera, organized=True)
 
         # get valid points
         depth_mask = (depth > 0)
         seg_mask = (seg > 0)
-        # hole_mask = map_with_hole(720, 1280, num=1000, r=10)
         if self.remove_outlier:
             camera_poses = np.load(os.path.join(self.root, 'scenes', scene, self.camera, 'camera_poses.npy'))
             align_mat = np.load(os.path.join(self.root, 'scenes', scene, self.camera, 'cam0_wrt_table.npy'))
@@ -330,23 +325,8 @@ def collate_fn(batch):
     
     raise TypeError("batch must contain tensors, dicts or lists; found {}".format(type(batch[0])))
 
-def map_with_hole(height, width, num = 5, r = 80):
-    img = np.zeros((height, width, 3), dtype = np.uint8)
-    for i in range(num):
-        cv2.circle(img,(randint(0, width), randint(0, height)), randint(int(r / 2), r), (255,255,255), -1)
-    mask = img[:,:,0].astype(bool)
-    return mask
-
-def add_gaussian_noise(depth, sigma=5):
-    h, w = depth.shape
-    depth_mask = (depth > 0)
-    noises = np.random.normal(scale=sigma, size=[h,w]).astype(depth.dtype)
-    depth[depth_mask] += noises[depth_mask]
-    return depth
-
 if __name__ == "__main__":
-    # root = '/DATA1/minghao/6dpose/scenes/'
-    root = '/DATA2/Benchmark/graspnet'
+    root = '/data/Benchmark/graspnet'
     valid_obj_idxs, grasp_labels = load_grasp_labels(root)
     train_dataset = GraspNetDataset(root, valid_obj_idxs, grasp_labels, split='train', remove_outlier=True, remove_invisible=True, num_points=20000)
     print(len(train_dataset))
