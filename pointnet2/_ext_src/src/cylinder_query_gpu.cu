@@ -1,7 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
-// 
-// This source code is licensed under the MIT license found in the
-// LICENSE file in the root directory of this source tree.
+// Author: chenxi-wang
 
 #include <math.h>
 #include <stdio.h>
@@ -9,8 +6,6 @@
 
 #include "cuda_utils.h"
 
-// input: new_xyz(b, m, 3) xyz(b, n, 3) rot_c2w(b, m, 9)
-// output: idx(b, m, nsample)
 __global__ void query_cylinder_point_kernel(int b, int n, int m, float radius, float hmin, float hmax,
                                         int nsample,
                                         const float *__restrict__ new_xyz,

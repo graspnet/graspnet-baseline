@@ -1,3 +1,7 @@
+""" GraspNet baseline model definition.
+    Author: chenxi-wang
+"""
+
 import os
 import sys
 import torch

@@ -1,3 +1,6 @@
+""" PointNet2 backbone for feature learning.
+    Author: Charles R. Qi
+"""
 import os
 import sys
 import torch

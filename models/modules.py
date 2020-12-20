@@ -1,3 +1,7 @@
+""" Modules for GraspNet baseline model.
+    Author: chenxi-wang
+"""
+
 import os
 import sys
 import torch
@@ -17,13 +21,13 @@ from loss_utils import generate_grasp_views, batch_viewpoint_params_to_matrix
 
 class ApproachNet(nn.Module):
     def __init__(self, num_view, seed_feature_dim):
-        """ Viewpoint estimation module from seed point features.
+        """ Approach vector estimation from seed point features.
 
-        Args:
-            num_view: int
-                number of views generated from each each seed point
-            seed_feature_dim:
-                numbe of channels of seed point features
+            Input:
+                num_view: [int]
+                    number of views generated from each each seed point
+                seed_feature_dim: [int]
+                    number of channels of seed point features
         """
         super().__init__()
         self.num_view = num_view
@@ -35,17 +39,17 @@ class ApproachNet(nn.Module):
         self.bn2 = nn.BatchNorm1d(2+self.num_view)
 
     def forward(self, seed_xyz, seed_features, end_points):
-        """ Forward pass
+        """ Forward pass.
 
-        Arguments:
-            seed_xyz: (batch_size, num_seed, 3) Pytorch tensor
-            seed_features: (batch_size, feature_dim, num_seed) Pytorch tensor
-            end_points: dict
-        Returns:
-            objectness_score:
-            view_score:
-            vp_xyz: (batch_size, num_seed, 3) top viewpoint xyz on spherical surface
-            vp_rot: (batch_size, num_seed, 3, 3) rotation matrix based on top viewpoints
+            Input:
+                seed_xyz: [torch.FloatTensor, (batch_size,num_seed,3)]
+                    coordinates of seed points
+                seed_features: [torch.FloatTensor, (batch_size,feature_dim,num_seed)
+                    features of seed points
+                end_points: [dict]
+
+            Output:
+                end_points: [dict]
         """
         B, num_seed, _ = seed_xyz.size()
         features = F.relu(self.bn1(self.conv1(seed_features)), inplace=True)
@@ -74,6 +78,20 @@ class ApproachNet(nn.Module):
 
 
 class CloudCrop(nn.Module):
+    """ Cylinder group and align for grasp configure estimation. Return a list of grouped points with different cropping depths.
+
+        Input:
+            nsample: [int]
+                sample number in a group
+            seed_feature_dim: [int]
+                number of channels of grouped points
+            cylinder_radius: [float]
+                radius of the cylinder space
+            hmin: [float]
+                height of the bottom surface
+            hmax_list: [list of float]
+                list of heights of the upper surface
+    """
     def __init__(self, nsample, seed_feature_dim, cylinder_radius=0.05, hmin=-0.02, hmax_list=[0.01,0.02,0.03,0.04]):
         super().__init__()
         self.nsample = nsample
@@ -89,10 +107,19 @@ class CloudCrop(nn.Module):
         self.mlps = pt_utils.SharedMLP(mlps, bn=True)
 
     def forward(self, seed_xyz, pointcloud, vp_rot):
-        """
-        seed_xyz: (batch_size, num_sample, 3)
-        pointcloud: (batch_size, num_seed, 3)
-        vp_rot: (batch_size, num_seed, 3, 3)
+        """ Forward pass.
+
+            Input:
+                seed_xyz: [torch.FloatTensor, (batch_size,num_seed,3)]
+                    coordinates of seed points
+                pointcloud: [torch.FloatTensor, (batch_size,num_seed,3)]
+                    the points to be cropped
+                vp_rot: [torch.FloatTensor, (batch_size,num_seed,3,3)]
+                    rotation matrices generated from approach vectors
+
+            Output:
+                vp_features: [torch.FloatTensor, (batch_size,num_features,num_seed,num_depth)]
+                    features of grouped points in different depths
         """
         B, num_seed, _, _ = vp_rot.size()
         num_depth = len(self.groupers)
@@ -115,13 +142,24 @@ class CloudCrop(nn.Module):
 
         
 class OperationNet(nn.Module):
+    """ Grasp configure estimation.
+
+        Input:
+            num_angle: [int]
+                number of in-plane rotation angle classes
+                the value of the i-th class --> i*PI/num_angle (i=0,...,num_angle-1)
+            num_depth: [int]
+                number of gripper depth classes
+    """
     def __init__(self, num_angle, num_depth):
-        super().__init__()
-        self.num_angle = num_angle
-        self.num_depth = num_depth
+        # Output:
         # scores(num_angle)
         # angle class (num_angle)
         # width (num_angle)
+        super().__init__()
+        self.num_angle = num_angle
+        self.num_depth = num_depth
+
         self.conv1 = nn.Conv1d(256, 128, 1)
         self.conv2 = nn.Conv1d(128, 128, 1)
         self.conv3 = nn.Conv1d(128, 3*num_angle, 1)
@@ -129,6 +167,16 @@ class OperationNet(nn.Module):
         self.bn2 = nn.BatchNorm1d(128)
 
     def forward(self, vp_features, end_points):
+        """ Forward pass.
+
+            Input:
+                vp_features: [torch.FloatTensor, (batch_size,num_seed,3)]
+                    features of grouped points in different depths
+                end_points: [dict]
+
+            Output:
+                end_points: [dict]
+        """
         B, _, num_seed, num_depth = vp_features.size()
         vp_features = vp_features.view(B, -1, num_seed*num_depth)
         vp_features = F.relu(self.bn1(self.conv1(vp_features)), inplace=True)
@@ -144,9 +192,19 @@ class OperationNet(nn.Module):
 
     
 class ToleranceNet(nn.Module):
+    """ Grasp tolerance prediction.
+    
+        Input:
+            num_angle: [int]
+                number of in-plane rotation angle classes
+                the value of the i-th class --> i*PI/num_angle (i=0,...,num_angle-1)
+            num_depth: [int]
+                number of gripper depth classes
+    """
     def __init__(self, num_angle, num_depth):
-        super().__init__()
+        # Output:
         # tolerance (num_angle)
+        super().__init__()
         self.conv1 = nn.Conv1d(256, 128, 1)
         self.conv2 = nn.Conv1d(128, 128, 1)
         self.conv3 = nn.Conv1d(128, num_angle, 1)
@@ -154,6 +212,16 @@ class ToleranceNet(nn.Module):
         self.bn2 = nn.BatchNorm1d(128)
 
     def forward(self, vp_features, end_points):
+        """ Forward pass.
+
+            Input:
+                vp_features: [torch.FloatTensor, (batch_size,num_seed,3)]
+                    features of grouped points in different depths
+                end_points: [dict]
+
+            Output:
+                end_points: [dict]
+        """
         B, _, num_seed, num_depth = vp_features.size()
         vp_features = vp_features.view(B, -1, num_seed*num_depth)
         vp_features = F.relu(self.bn1(self.conv1(vp_features)), inplace=True)

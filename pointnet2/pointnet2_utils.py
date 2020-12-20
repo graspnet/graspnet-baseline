@@ -424,7 +424,7 @@ class GroupAll(nn.Module):
 class CylinderQuery(Function):
     @staticmethod
     def forward(ctx, radius, hmin, hmax, nsample, xyz, new_xyz, rot):
-        # type: (Any, float, int, torch.Tensor, torch.Tensor) -> torch.Tensor
+        # type: (Any, float, float, float, int, torch.Tensor, torch.Tensor, torch.Tensor) -> torch.Tensor
         r"""
 
         Parameters

@@ -1,3 +1,7 @@
+""" GraspNet dataset processing.
+    Author: chenxi-wang
+"""
+
 import os
 import sys
 import numpy as np

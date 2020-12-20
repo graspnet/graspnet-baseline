@@ -1,13 +1,17 @@
 # GraspNet Baseline
-Baseline model for [GraspNet-1Billion](https://graspnet.net/) dataset (CVPR 2020).
+Baseline model for ''GraspNet-1Billion: A Large-Scale Benchmark for General Object Grasping'' (CVPR 2020).
 
-[[paper](https://openaccess.thecvf.com/content_CVPR_2020/papers/Fang_GraspNet-1Billion_A_Large-Scale_Benchmark_for_General_Object_Grasping_CVPR_2020_paper.pdf)][[dataset](https://graspnet.net/)][[API](https://github.com/graspnet/graspnetAPI)][[doc](https://graspnetapi.readthedocs.io/en/latest/index.html)]
+[[paper](https://openaccess.thecvf.com/content_CVPR_2020/papers/Fang_GraspNet-1Billion_A_Large-Scale_Benchmark_for_General_Object_Grasping_CVPR_2020_paper.pdf)]
+[[dataset](https://graspnet.net/)]
+[[API](https://github.com/graspnet/graspnetAPI)]
+[[doc](https://graspnetapi.readthedocs.io/en/latest/index.html)]
 
 ![teaser](doc/teaser.png)
 
 ## Requirements
 - Python 3
 - PyTorch 1.6
+- Open3d 0.8
 - TensorBoard 2.3
 - NumPy
 - SciPy
@@ -28,28 +32,24 @@ Compile and install pointnet2 operators. (Code adapted from [votenet](https://gi
 ```bash
 cd pointnet2
 python setup.py install
-cd ..
 ```
 Compile and install knn operator. (Code adapted from [pytorch_knn_cuda](https://github.com/chrischoy/pytorch_knn_cuda))
 ```bash
 cd knn
 python setup.py install
-cd ..
 ```
 Install graspnetAPI for evaluation.
 ```bash
 git clone https://github.com/graspnet/graspnetAPI.git
 cd graspnetAPI
 pip install .
-cd ..
 ```
 
 ## Tolerance Label Generation
-Tolerance labels are not included in the original dataset, and need additional generation. The generation code is in [`dataset/generate_tolerance_label.py`](dataset/generate_tolerance_label.py). You can simply generate tolerance label by running the scripts: (`--dataset_root` should be specified according to your settings)
+Tolerance labels are not included in the original dataset, and need additional generation. Make sure you have downloaded the orginal dataset from [GraspNet](https://graspnet.net/). The generation code is in [dataset/generate_tolerance_label.py](dataset/generate_tolerance_label.py). You can simply generate tolerance label by running the script: (`--dataset_root` and `--num_workers` should be specified according to your settings)
 ```bash
 cd dataset
 sh command_generate_tolerance_label.sh
-cd ..
 ```
 
 ## Training and Testing

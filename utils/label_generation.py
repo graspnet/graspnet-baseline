@@ -1,3 +1,7 @@
+""" Dynamically generate grasp labels during training.
+    Author: chenxi-wang
+"""
+
 import os
 import sys
 import torch
@@ -12,6 +16,7 @@ from loss_utils import GRASP_MAX_WIDTH, batch_viewpoint_params_to_matrix,\
                        transform_point_cloud, generate_grasp_views
 
 def process_grasp_labels(end_points):
+    """ Process labels according to scene points and object poses. """
     clouds = end_points['input_xyz'] #(B, N, 3)
     seed_xyzs = end_points['fp2_xyz'] #(B, Ns, 3)
     batch_size, num_samples, _ = seed_xyzs.size()
@@ -122,6 +127,7 @@ def process_grasp_labels(end_points):
     return end_points
 
 def match_grasp_view_and_label(end_points):
+    """ Slice grasp labels according to predicted views. """
     top_view_inds = end_points['grasp_top_view_inds'] # (B, Ns)
     template_views_rot = end_points['batch_grasp_view_rot'] # (B, Ns, V, 3, 3)
     grasp_labels = end_points['batch_grasp_label'] # (B, Ns, V, A, D)
