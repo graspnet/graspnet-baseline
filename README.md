@@ -57,4 +57,17 @@ Training examples are shown in [command_train.sh](command_train.sh). `--dataset_
 
 Testing examples are shown in [command_test.sh](command_test.sh), which contains inference and result evaluation. `--dataset_root`, `--camera`, `--checkpoint_path` and `--dump_dir` should be specified according to your settings.
 
+## Citation
+Please cite our paper in your publications if it helps your research:
+```
+@inproceedings{fang2020graspnet,
+  title={GraspNet-1Billion: A Large-Scale Benchmark for General Object Grasping},
+  author={Fang, Hao-Shu and Wang, Chenxi and Gou, Minghao and Lu, Cewu},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition(CVPR)},
+  pages={11444--11453},
+  year={2020}
+}
+```
 
+## License
+graspnet-baseline is relased under AFL-3.0. See [LICENSE](LICENSE) for more details.
