@@ -70,4 +70,4 @@ Please cite our paper in your publications if it helps your research:
 ```
 
 ## License
-graspnet-baseline is relased under AFL-3.0. See [LICENSE](LICENSE) for more details.
+All data, labels, code and models belong to the graspnet team, MVIG, SJTU and are freely available for free non-commercial use, and may be redistributed under these conditions. For commercial queries, please drop an email at fhaoshu at gmail_dot_com and cc lucewu at sjtu.edu.cn .
