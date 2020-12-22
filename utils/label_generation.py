@@ -143,9 +143,9 @@ def match_grasp_view_and_label(end_points):
     top_view_inds_ = top_view_inds.view(B, Ns, 1, 1, 1, 1).expand(-1, -1, -1, A, D, 3)
     top_view_grasp_offsets = torch.gather(grasp_offsets, 2, top_view_inds_).squeeze(2)
 
-    end_points['top_template_views_rot'] = top_template_views_rot
-    end_points['top_view_grasp_labels'] = top_view_grasp_labels
-    end_points['top_view_grasp_offsets'] = top_view_grasp_offsets
-    end_points['top_view_grasp_tolerance'] = top_view_grasp_tolerance
+    end_points['batch_grasp_view_rot'] = top_template_views_rot
+    end_points['batch_grasp_label'] = top_view_grasp_labels
+    end_points['batch_grasp_offset'] = top_view_grasp_offsets
+    end_points['batch_grasp_tolerance'] = top_view_grasp_tolerance
 
     return top_template_views_rot, top_view_grasp_labels, top_view_grasp_offsets, top_view_grasp_tolerance, end_points

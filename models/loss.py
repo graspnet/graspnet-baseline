@@ -69,27 +69,26 @@ def compute_view_loss(end_points):
 def compute_grasp_loss(end_points, use_template_in_training=True):
     top_view_inds = end_points['grasp_top_view_inds'] # (B, Ns)
     vp_rot = end_points['grasp_top_view_rot'] # (B, Ns, view_factor, 3, 3)
-    grasp_labels = end_points['batch_grasp_label'] # (B, Ns, V, A, D)
     objectness_label = end_points['objectness_label']
     fp2_inds = end_points['fp2_inds'].long()
     objectness_mask = torch.gather(objectness_label, 1, fp2_inds).bool() # (B, Ns)
 
     # process labels
-    top_view_grasp_labels = end_points['top_view_grasp_labels'] # (B, Ns, A, D)
-    top_view_grasp_offsets = end_points['top_view_grasp_offsets'] # (B, Ns, A, D, 3)
-    top_view_grasp_tolerance = end_points['top_view_grasp_tolerance'] # (B, Ns, A, D)
-    B, Ns, V, A, D = grasp_labels.size()
+    batch_grasp_label = end_points['batch_grasp_label'] # (B, Ns, A, D)
+    batch_grasp_offset = end_points['batch_grasp_offset'] # (B, Ns, A, D, 3)
+    batch_grasp_tolerance = end_points['batch_grasp_tolerance'] # (B, Ns, A, D)
+    B, Ns, A, D = batch_grasp_label.size()
 
     # pick the one with the highest angle score
-    top_view_grasp_angles = top_view_grasp_offsets[:, :, :, :, 0] #(B, Ns, A, D)
-    top_view_grasp_depths = top_view_grasp_offsets[:, :, :, :, 1] #(B, Ns, A, D)
-    top_view_grasp_widths = top_view_grasp_offsets[:, :, :, :, 2] #(B, Ns, A, D)
-    target_labels_inds = torch.argmax(top_view_grasp_labels, dim=2, keepdim=True) # (B, Ns, 1, D)
-    target_labels = torch.gather(top_view_grasp_labels, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
+    top_view_grasp_angles = batch_grasp_offset[:, :, :, :, 0] #(B, Ns, A, D)
+    top_view_grasp_depths = batch_grasp_offset[:, :, :, :, 1] #(B, Ns, A, D)
+    top_view_grasp_widths = batch_grasp_offset[:, :, :, :, 2] #(B, Ns, A, D)
+    target_labels_inds = torch.argmax(batch_grasp_label, dim=2, keepdim=True) # (B, Ns, 1, D)
+    target_labels = torch.gather(batch_grasp_label, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
     target_angles = torch.gather(top_view_grasp_angles, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
     target_depths = torch.gather(top_view_grasp_depths, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
     target_widths = torch.gather(top_view_grasp_widths, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
-    target_tolerance = torch.gather(top_view_grasp_tolerance, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
+    target_tolerance = torch.gather(batch_grasp_tolerance, 2, target_labels_inds).squeeze(2) # (B, Ns, D)
 
     graspable_mask = (target_labels > THRESH_BAD)
     objectness_mask = objectness_mask.unsqueeze(-1).expand_as(graspable_mask)
