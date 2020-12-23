@@ -75,6 +75,9 @@ The pretrained weights can be downloaded from:
 
 `checkpoint-rs.tar` and `checkpoint-kn.tar` are trained using RealSense data and Kinect data respectively.
 
+## Demo
+A demo program is provided for grasp prediction and visualization using RGB-D images. You can refer to [command_demo.sh](command_demo.sh) to run the program (`--checkpoint_path` should be specified according to your settings). Make sure you have downloaded the pretrained weights before running the program.
+
 ## Results
 
 "In repo" results report the model performance with single-view collision detection as post-processing. In evaluation we set `--collision_thresh` to 0.01.

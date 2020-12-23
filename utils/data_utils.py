@@ -145,4 +145,5 @@ def get_workspace_mask(cloud, seg, trans=None, organized=True, outlier=0):
     workspace_mask = (mask_x & mask_y & mask_z)
     if organized:
         workspace_mask = workspace_mask.reshape([h, w])
+
     return workspace_mask

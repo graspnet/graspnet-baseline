@@ -61,10 +61,11 @@ class GraspNetDataset(Dataset):
                 self.metapath.append(os.path.join(root, 'scenes', x, camera, 'meta', str(img_num).zfill(4)+'.mat'))
                 self.scenename.append(x.strip())
                 self.frameid.append(img_num)
-            collision_labels = np.load(os.path.join(root, 'collision_label', x.strip(),  'collision_labels.npz'))
-            self.collision_labels[x.strip()] = {}
-            for i in range(len(collision_labels)):
-                self.collision_labels[x.strip()][i] = collision_labels['arr_{}'.format(i)]
+            if load_label:
+                collision_labels = np.load(os.path.join(root, 'collision_label', x.strip(),  'collision_labels.npz'))
+                self.collision_labels[x.strip()] = {}
+                for i in range(len(collision_labels)):
+                    self.collision_labels[x.strip()][i] = collision_labels['arr_{}'.format(i)]
 
     def scene_list(self):
         return self.scenename
@@ -148,7 +149,7 @@ class GraspNetDataset(Dataset):
         ret_dict['point_clouds'] = cloud_sampled.astype(np.float32)
         ret_dict['cloud_colors'] = color_sampled.astype(np.float32)
 
-        return ret_dict
+        return ret_dict, workspace_mask
 
     def get_data_label(self, index):
         color = np.array(Image.open(self.colorpath[index]), dtype=np.float32) / 255.0

@@ -5,8 +5,6 @@ import sys
 import numpy as np
 from datetime import datetime
 import argparse
-import importlib
-import time
 
 import torch
 import torch.nn as nn
@@ -27,7 +25,7 @@ from label_generation import process_grasp_labels
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_root', required=True, help='Dataset root')
-parser.add_argument('--camera', default='realsense', help='Camera split [realsense/kinect] [default: realsense]')
+parser.add_argument('--camera', required=True, help='Camera split [realsense/kinect]')
 parser.add_argument('--checkpoint_path', default=None, help='Model checkpoint path [default: None]')
 parser.add_argument('--log_dir', default='log', help='Dump dir to save model checkpoint [default: log]')
 parser.add_argument('--num_point', type=int, default=20000, help='Point Number [default: 20000]')
