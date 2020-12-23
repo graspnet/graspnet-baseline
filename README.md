@@ -52,11 +52,11 @@ cd dataset
 sh command_generate_tolerance_label.sh
 ```
 
-Or you can download the tolerance labels from [Baidu Pan](https://pan.baidu.com/s/1HN29P-csHavJF-R_wec6SQ) and run:
+Or you can download the tolerance labels from [Google Drive](https://drive.google.com/file/d/1DcjGGhZIJsxd61719N0iWA7L6vNEK0ci/view?usp=sharing)/[Baidu Pan](https://pan.baidu.com/s/1HN29P-csHavJF-R_wec6SQ) and run:
 ```bash
 mv tolerance.tar dataset/
 cd dataset
-tar -xvf tolerace.tar
+tar -xvf tolerance.tar
 ```
 
 ## Training and Testing
