@@ -149,7 +149,7 @@ class GraspNetDataset(Dataset):
         ret_dict['point_clouds'] = cloud_sampled.astype(np.float32)
         ret_dict['cloud_colors'] = color_sampled.astype(np.float32)
 
-        return ret_dict, workspace_mask
+        return ret_dict
 
     def get_data_label(self, index):
         color = np.array(Image.open(self.colorpath[index]), dtype=np.float32) / 255.0
