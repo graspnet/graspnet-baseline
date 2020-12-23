@@ -151,7 +151,7 @@ def inference():
             gg = GraspGroup(preds)
 
             # collision detection
-            if cfgs.collision_thresh is not None:
+            if cfgs.collision_thresh > 0:
                 cloud, _ = TEST_DATASET.get_data(data_idx, return_raw_cloud=True)
                 mfcdetector = ModelFreeCollisionDetector(cloud, voxel_size=cfgs.voxel_size)
                 collision_mask = mfcdetector.detect(gg, approach_dist=0.05, collision_thresh=cfgs.collision_thresh)
