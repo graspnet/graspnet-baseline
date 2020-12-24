@@ -61,7 +61,7 @@ class GraspNetDataset(Dataset):
                 self.metapath.append(os.path.join(root, 'scenes', x, camera, 'meta', str(img_num).zfill(4)+'.mat'))
                 self.scenename.append(x.strip())
                 self.frameid.append(img_num)
-            if load_label:
+            if self.load_label:
                 collision_labels = np.load(os.path.join(root, 'collision_label', x.strip(),  'collision_labels.npz'))
                 self.collision_labels[x.strip()] = {}
                 for i in range(len(collision_labels)):
