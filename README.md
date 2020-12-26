@@ -10,7 +10,7 @@ Baseline model for "GraspNet-1Billion: A Large-Scale Benchmark for General Objec
     <img src="https://github.com/chenxi-wang/materials/blob/master/graspnet-baseline/doc/gifs/scene_0114.gif", width="240", alt="scene_0114" />
     <img src="https://github.com/chenxi-wang/materials/blob/master/graspnet-baseline/doc/gifs/scene_0116.gif", width="240", alt="scene_0116" />
     <img src="https://github.com/chenxi-wang/materials/blob/master/graspnet-baseline/doc/gifs/scene_0117.gif", width="240", alt="scene_0117" />
-    <br> Top 50 grasps detected by baseline model.
+    <br> Top 50 grasps detected by our baseline model.
 </div>
 
 ![teaser](doc/teaser.png)
@@ -35,12 +35,12 @@ Install packages via Pip.
 ```bash
 pip install -r requirements.txt
 ```
-Compile and install pointnet2 operators. (Code adapted from [votenet](https://github.com/facebookresearch/votenet))
+Compile and install pointnet2 operators (code adapted from [votenet](https://github.com/facebookresearch/votenet)).
 ```bash
 cd pointnet2
 python setup.py install
 ```
-Compile and install knn operator. (Code adapted from [pytorch_knn_cuda](https://github.com/chrischoy/pytorch_knn_cuda))
+Compile and install knn operator (code adapted from [pytorch_knn_cuda](https://github.com/chrischoy/pytorch_knn_cuda)).
 ```bash
 cd knn
 python setup.py install
@@ -83,14 +83,16 @@ The pretrained weights can be downloaded from:
 `checkpoint-rs.tar` and `checkpoint-kn.tar` are trained using RealSense data and Kinect data respectively.
 
 ## Demo
-A demo program is provided for grasp prediction and visualization using RGB-D images. You can refer to [command_demo.sh](command_demo.sh) to run the program (`--checkpoint_path` should be specified according to your settings). Make sure you have downloaded the pretrained weights before running the program. The output should be similar to the following example:
+A demo program is provided for grasp detection and visualization using RGB-D images. You can refer to [command_demo.sh](command_demo.sh) to run the program. `--checkpoint_path` should be specified according to your settings (make sure you have downloaded the pretrained weights). The output should be similar to the following example:
 
 <div align="center">    
     <img src="doc/example_data/demo_result.png", width="480", alt="demo_result" />
 </div>
 
+__Try your own data__ by modifying `get_and_process_data()` in [demo.py](demo.py). Refer to [doc/example_data/](doc/example_data/) for data preparation. RGB-D images and camera intrinsics are required for inference. `factor_depth` stands for the scale for depth value to be transformed into meters. You can also add a workspace mask for denser output.
+
 ## Results
-"In repo" results report the model performance with single-view collision detection as post-processing. In evaluation we set `--collision_thresh` to 0.01.
+Results "In repo" report the model performance with single-view collision detection as post-processing. In evaluation we set `--collision_thresh` to 0.01.
 
 Evaluation results on RealSense camera:
 |          |        | Seen             |                  |        | Similar          |                  |        | Novel            |                  | 
