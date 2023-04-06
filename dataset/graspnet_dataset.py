@@ -46,7 +46,7 @@ class GraspNetDataset(Dataset):
         elif split == 'test_novel':
             self.sceneIds = list( range(160,190) )
         self.sceneIds = ['scene_{}'.format(str(x).zfill(4)) for x in self.sceneIds]
-        
+
         self.colorpath = []
         self.depthpath = []
         self.labelpath = []
@@ -144,7 +144,7 @@ class GraspNetDataset(Dataset):
             idxs = np.concatenate([idxs1, idxs2], axis=0)
         cloud_sampled = cloud_masked[idxs]
         color_sampled = color_masked[idxs]
-        
+
         ret_dict = {}
         ret_dict['point_clouds'] = cloud_sampled.astype(np.float32)
         ret_dict['cloud_colors'] = color_sampled.astype(np.float32)
@@ -197,7 +197,7 @@ class GraspNetDataset(Dataset):
         seg_sampled = seg_masked[idxs]
         objectness_label = seg_sampled.copy()
         objectness_label[objectness_label>1] = 1
-        
+
         object_poses_list = []
         grasp_points_list = []
         grasp_offsets_list = []
@@ -231,10 +231,10 @@ class GraspNetDataset(Dataset):
             tolerance = tolerance[idxs].copy()
             tolerance[collision] = 0
             grasp_tolerance_list.append(tolerance)
-        
+
         if self.augment:
             cloud_sampled, object_poses_list = self.augment_data(cloud_sampled, object_poses_list)
-        
+
         ret_dict = {}
         ret_dict['point_clouds'] = cloud_sampled.astype(np.float32)
         ret_dict['cloud_colors'] = color_sampled.astype(np.float32)
@@ -268,7 +268,7 @@ def collate_fn(batch):
         return {key:collate_fn([d[key] for d in batch]) for key in batch[0]}
     elif isinstance(batch[0], container_abcs.Sequence):
         return [[torch.from_numpy(sample) for sample in b] for b in batch]
-    
+
     raise TypeError("batch must contain tensors, dicts or lists; found {}".format(type(batch[0])))
 
 if __name__ == "__main__":
