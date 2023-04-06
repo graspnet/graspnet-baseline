@@ -272,7 +272,7 @@ def collate_fn(batch):
     raise TypeError("batch must contain tensors, dicts or lists; found {}".format(type(batch[0])))
 
 if __name__ == "__main__":
-    root = '/data/Benchmark/graspnet'
+    root = '~/graspnet'
     valid_obj_idxs, grasp_labels = load_grasp_labels(root)
     train_dataset = GraspNetDataset(root, valid_obj_idxs, grasp_labels, split='train', remove_outlier=True, remove_invisible=True, num_points=20000)
     print(len(train_dataset))
