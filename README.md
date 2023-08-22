@@ -111,6 +111,14 @@ Evaluation results on Kinect camera:
 ## Citation
 Please cite our paper in your publications if it helps your research:
 ```
+@article{fang2023robust,
+  title={Robust grasping across diverse sensor qualities: The GraspNet-1Billion dataset},
+  author={Fang, Hao-Shu and Gou, Minghao and Wang, Chenxi and Lu, Cewu},
+  journal={The International Journal of Robotics Research},
+  year={2023},
+  publisher={SAGE Publications Sage UK: London, England}
+}
+
 @inproceedings{fang2020graspnet,
   title={GraspNet-1Billion: A Large-Scale Benchmark for General Object Grasping},
   author={Fang, Hao-Shu and Wang, Chenxi and Gou, Minghao and Lu, Cewu},
